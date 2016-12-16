@@ -1,0 +1,13 @@
+#!/bin/bash
+
+MAIL() {
+echo "tar report file ..."
+tar -cf net.tar.gz ./net-analysis/**/report*
+echo "send email ..."
+mail -s "network analysis $(date +"%y-%m-%d %T")" "$1" < net.tar.gz
+echo "rm tar file"
+rm -rf net.tar.gz
+echo "... done"
+}
+
+[ "$1" = "" ] && echo "Please enter your e-mail adrress!" || MAIL "$1"

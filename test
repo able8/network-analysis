@@ -1,0 +1,110 @@
+#!/bin/bash
+REPORT_PATH="./net-analysis/$(date +"%y-%m-%d")"
+REPORT_FILE="$REPORT_PATH""/report-$(date +"%T")"
+[ -d "$REPORT_PATH" ] || mkdir -p "$REPORT_PATH"
+
+TEST_BASIC() {
+  
+  echo "\nnet-analysis $(date +"%y-%m-%d %T")\n"
+
+  echo "list current DNS server and Gateway ..."
+  echo "\n|--------------------------------|" >>  "$REPORT_FILE"
+  echo "|------ current DNS server and Gateway ------|" >> "$REPORT_FILE"
+  echo "| nmcli device show "$1" |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  nmcli device show "$1" | grep IP4 >> "$REPORT_FILE"
+  echo "|--------------------------------|\n" >> "$REPORT_FILE"
+  echo "... done"
+
+  echo "list current DHCP server ..."
+  echo "\n|--------------------------------|" >>  "$REPORT_FILE"
+  echo "|------ list current DHCP server ------|" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  grep dhcp-server-identifier /var/lib/**/*.leases >> "$REPORT_FILE"
+  echo "|--------------------------------|\n" >> "$REPORT_FILE"
+  echo "... done"
+}
+
+TEST_PERFORMANCE() {
+
+  echo "test packet loss ..."
+  echo "testing bing ..."
+  echo "\n|--------------------------------|" >>  "$REPORT_FILE"
+  echo "|------ test packet loss ------|" >> "$REPORT_FILE"
+
+  echo "| mtr www.bing.com    |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  mtr --report --report-cycles 20 www.bing.com >> "$REPORT_FILE"
+  echo "... done" 
+  
+  echo "testing shanbay ..."
+  echo "| mtr www.shanbay.com    |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  mtr --report --report-cycles 20 www.shanbay.com >> "$REPORT_FILE"
+  echo "... done"
+
+  echo "testing bing ..."
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  echo "| mtr www.github.com    |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  mtr --report --report-cycles 20 www.github.com >> "$REPORT_FILE"
+  echo "... done"
+
+  echo "testing google ..."
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  echo "| mtr www.google.com    |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  mtr --report --report-cycles 20 www.google.com >> "$REPORT_FILE"
+  echo "|--------------------------------|\n" >> "$REPORT_FILE"
+  echo "... done"
+
+  echo "testing docker ..."
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  echo "| mtr hub.docker.com    |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  mtr --report --report-cycles 20 hub.docker.com >> "$REPORT_FILE"
+  echo "... done"
+
+  echo "testing youtube ..."
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  echo "| mtr www.youtube.com    |" >> "$REPORT_FILE"
+  echo "|--------------------------------|" >> "$REPORT_FILE"
+  mtr --report --report-cycles 20 www.youtube.com >> "$REPORT_FILE"
+  echo "|--------------------------------|\n" >> "$REPORT_FILE"
+  echo "... done"
+
+  echo "test ISP bandwidth ..."
+  echo "\n|--------------------------------|" >>  "$REPORT_FILE"
+  echo "|------ test ISP bandwidth 3 times ------|" >> "$REPORT_FILE"
+  echo "| speedtest.py --server 6435 (china Telecom hubei) |" >> "$REPORT_FILE"
+  for i in 1 2 3
+  do
+    echo "No."$i" start ..."
+    echo "|--------------------------------|" >> "$REPORT_FILE"
+    speedtest.py --server 6435 | grep "load:" >> "$REPORT_FILE"
+    echo "... done"
+  done
+
+  echo "|--------------------------------|\n" >> "$REPORT_FILE"
+  echo "test download and upload bandwidth ..."
+  echo "\n|--------------------------------|" >>  "$REPORT_FILE"
+  echo "|------ test bandwidth 3 times ------|" >> "$REPORT_FILE"
+  echo "| speedtest.py --server 6508 (at2wn Yokohama, Japan) |" >> "$REPORT_FILE"
+  for i in 1 2 3
+  do
+    echo "No."$i" start ..."
+  	echo "|--------------------------------|" >> "$REPORT_FILE"
+    speedtest.py --server 6508 | grep "load:" >> "$REPORT_FILE"
+    echo "... done"
+  done
+  echo "|--------------------------------|\n" >> "$REPORT_FILE"
+}
+
+TEST() {
+  TEST_BASIC "$1"
+  TEST_PERFORMANCE
+}
+
+
+
+[ "$1" = "" ] && echo "Please enter your network interface name!" || TEST "$1"

@@ -1,0 +1,11 @@
+#!/bin/bash
+SPEEDTEST_URL="https://raw.githubusercontent.com/sivel/speedtest-cli/master/speedtest.py"
+
+echo "get speedtest.py ..."
+sudo curl -o /usr/bin/speedtest.py "$SPEEDTEST_URL"
+sudo chmod +x /usr/bin/speedtest.py
+
+echo "install mailutils ..."
+sudo apt-get install -y mailutils
+
+echo ".. done"
